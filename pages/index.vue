@@ -1,65 +1,57 @@
 <template>
   <section class="container">
-    <div>
-      <app-logo/>
-      <h1 class="title">
-        contentful-test
-      </h1>
-      <h2 class="subtitle">
-        Contentful test
-      </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green">Documentation</a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey">GitHub</a>
-      </div>
+    <div v-for="item in items" :key="item.sys.id" class="entry">
+      <h2>{{item.fields.title}}</h2>
+      <img :src="item.fields.image[0].fields.file.url"/>
+      <div v-html="item.fields.body"></div>
     </div>
   </section>
 </template>
 
 <script>
-import AppLogo from '~/components/AppLogo.vue'
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
+const contentful = require('contentful')
+
+const client = contentful.createClient({
+  space: process.env.CTF_SPACE_ID,
+  accessToken: process.env.CTF_CDA_ACCESS_TOKEN
+})
 
 export default {
-  components: {
-    AppLogo
-  }
+  async asyncData() {
+    return await client.getEntries()
+      .then(entries => {
+        entries.items.forEach(item => {
+          item.fields.body = documentToHtmlString(item.fields.body)
+        })
+
+        return {
+          items: entries.items
+        }
+      })
+  },
 }
 </script>
 
 <style>
 .container {
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   text-align: center;
 }
 
-.title {
-  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
+.entry {
+  width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid gray;
 }
 
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
+p {
+  text-align: left;
 }
 
-.links {
-  padding-top: 15px;
+img {
+  width: 100%
 }
 </style>
 

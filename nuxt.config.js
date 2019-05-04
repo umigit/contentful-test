@@ -20,6 +20,9 @@ module.exports = {
   /*
   ** Build configuration
   */
+  modules: [
+    '@nuxtjs/dotenv',
+  ],
   build: {
     /*
     ** Run ESLint on save
